@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Sentiment Analysis Tool</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navMenu = document.getElementById('nav-menu');
+
+    if (hamburgerBtn && navMenu) {
+      hamburgerBtn.addEventListener('click', function () {
+        navMenu.classList.toggle('active');
+      });
+    }
+  });
+</script>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="nav-brand">TextAnalyzer</div>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('analyze_page') }}">Analyze</a></li>
+        <li><a href="{{ url_for('history_page') }}">History</a></li>
+        <li><a href="{{ url_for('profile_page') }}" class="active">Profile</a></li>
+        <li><button id="logout-btn" class="btn-logout">Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="grid-2col">
+      <!-- User Details Card -->
+      <section class="card">
+        <h2>User Info</h2>
+        <article style="margin-top: 1rem;">
+          <p><strong>Username:</strong> <span id="profile-username">Loading...</span></p>
+          <p><strong>Email:</strong> <span id="profile-email">Loading...</span></p>
+        </article>
+      </section>
+
+      <!-- Statistics Card -->
+      <section class="card">
+        <h2>Usage Statistics</h2>
+        <article style="margin-top: 1rem;">
+          <p><strong>Total Analyses:</strong> <span id="stat-total">0</span></p>
+          <p><strong>Account Status:</strong> Active</p>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Sentiment Analysis System</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Courses</title>
+    <!-- Link both main style.css and courses.css for layout & grid controls -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/courses.css') }}">
+    <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navMenu = document.getElementById('nav-menu');
+
+    if (hamburgerBtn && navMenu) {
+      hamburgerBtn.addEventListener('click', function () {
+        navMenu.classList.toggle('active');
+      });
+    }
+  });
+</script>
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header>
+        <nav class="navbar">
+            <a href="/" class="nav-brand">SkillSync AI</a>
+            <button class="hamburger" id="hamburger-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="nav-menu">
+                <li><a href="/courses" class="active">Courses</a></li>
+                <li><a href="/analyze">Analyze</a></li>
+                <li><a href="/history">History</a></li>
+                <li><a href="/profile">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1>Explore AI & Tech Courses</h1>
+            <div class="search-bar-hero">
+                <input type="text" id="hero-search" placeholder="Search by topic, title, or instructor...">
+                <button class="btn-primary" style="width: auto; margin-top: 0;">Search</button>
+            </div>
+        </section>
+
+        <!-- Courses Container with Sidebar Filter and Grid -->
+        <div class="courses-container">
+            <!-- Sidebar Filter -->
+            <aside class="filter-sidebar">
+                <div class="filter-group">
+                    <h3>Skill Requirements</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+                        <label><input type="checkbox" value="Python"> Python</label>
+                        <label><input type="checkbox" value="SQL"> SQL</label>
+                        <label><input type="checkbox" value="Data Analysis"> Data Analysis</label>
+                        <label><input type="checkbox" value="Machine Learning"> Machine Learning</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Sort By</h3>
+                    <select style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <option value="relevance">Relevance</option>
+                        <option value="title">Course Title (A-Z)</option>
+                        <option value="newest">Newest Added</option>
+                    </select>
+                </div>
+            </aside>
+
+            <!-- Course Cards Grid -->
+            <section class="course-main-content">
+                <div class="course-grid">
+                    <!-- Example Course Card 1 -->
+                    <div class="course-card">
+                        <div class="course-image-placeholder">Python Masterclass</div>
+                        <div class="course-content">
+                            <h2 class="course-title">Python for Data Science</h2>
+                            <p class="course-instructor">By Dr. Alex Rivera</p>
+                            <p class="course-description">Master Python fundamentals, pandas, and data processing algorithms from scratch.</p>
+                            <div class="skill-tags">
+                                <span class="tag">Python</span>
+                                <span class="tag">Data Analysis</span>
+                            </div>
+                            <button class="btn-primary">View Details</button>
+                        </div>
+                    </div>
+
+                    <!-- Example Course Card 2 -->
+                    <div class="course-card">
+                        <div class="course-image-placeholder">PostgreSQL Systems</div>
+                        <div class="course-content">
+                            <h2 class="course-title">Database Design & SQL</h2>
+                            <p class="course-instructor">By Sarah Jenkins</p>
+                            <p class="course-description">Learn structural database design, normalization, complex joins, and performance indexing.</p>
+                            <div class="skill-tags">
+                                <span class="tag">SQL</span>
+                                <span class="tag">Databases</span>
+                            </div>
+                            <button class="btn-primary">View Details</button>
+                        </div>
+                    </div>
+
+                    <!-- Example Course Card 3 -->
+                    <div class="course-card">
+                        <div class="course-image-placeholder">Machine Learning</div>
+                        <div class="course-content">
+                            <h2 class="course-title">Applied ML & AI Vectors</h2>
+                            <p class="course-instructor">By Prof. Marcus Vance</p>
+                            <p class="course-description">Build neural networks, work with embeddings, and integrate vector databases in modern apps.</p>
+                            <div class="skill-tags">
+                                <span class="tag">Machine Learning</span>
+                                <span class="tag">Python</span>
+                            </div>
+                            <button class="btn-primary">View Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>Next &raquo;</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 SkillSync AI. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
