@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Sentiment Analysis Platform</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+  <title>Login - SkillSync AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 <body>
   <main class="auth-container">
     <section class="auth-card">
       <header class="auth-header">
         <h1>Welcome Back</h1>
-        <p>Log in to access your analysis tools</p>
+        <p>Log in to access your personalized learning recommendations</p>
       </header>
+
+      <!-- Error Alert Container -->
+      <div id="login-error" class="alert alert-danger d-none" role="alert" style="color: red; margin-bottom: 1rem;"></div>
 
       <form id="login-form">
         <div class="form-group">
-          <label for="identity">Email or Username</label>
-          <input type="text" id="identity" name="identity" required placeholder="name@example.com">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="name@example.com">
         </div>
 
         <div class="form-group">
@@ -34,5 +36,8 @@
       </footer>
     </section>
   </main>
+
+  <!-- Load Auth JavaScript Module -->
+  <script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
 </body>
 </html>

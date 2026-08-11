@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analysis History - Sentiment Analysis Tool</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Analysis History - SkillSync AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const hamburgerBtn = document.getElementById('hamburger-btn');
+      const navMenu = document.getElementById('nav-menu');
+
+      if (hamburgerBtn && navMenu) {
+        hamburgerBtn.addEventListener('click', function () {
+          navMenu.classList.toggle('active');
+        });
+      }
+    });
+  </script>
 </head>
 <body>
   <header>
     <nav class="navbar">
-      <div class="nav-brand">TextAnalyzer</div>
-      <ul class="nav-links">
+      <a href="{{ url_for('courses_page') }}" class="nav-brand">SkillSync AI</a>
+      <button class="hamburger" id="hamburger-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="{{ url_for('courses_page') }}">Courses</a></li>
         <li><a href="{{ url_for('analyze_page') }}">Analyze</a></li>
         <li><a href="{{ url_for('history_page') }}" class="active">History</a></li>
         <li><a href="{{ url_for('profile_page') }}">Profile</a></li>
@@ -28,7 +45,7 @@
       
       <!-- Filter controls -->
       <div class="filters" style="margin: 1rem 0;">
-        <input type="text" id="search-filter" placeholder="Search text..." style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+        <input type="text" id="search-filter" placeholder="Search history..." style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
       </div>
 
       <article>
@@ -37,7 +54,7 @@
             <tr>
               <th>ID</th>
               <th>Snippet</th>
-              <th>Sentiment</th>
+              <th>Score</th>
               <th>Date</th>
               <th>Action</th>
             </tr>
@@ -51,7 +68,10 @@
   </main>
 
   <footer>
-    <p>&copy; 2026 Sentiment Analysis System</p>
+    <p>&copy; 2026 SkillSync AI. All rights reserved.</p>
   </footer>
+
+  <!-- Load API and General JavaScript -->
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
 </body>
 </html>

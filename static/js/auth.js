@@ -1,134 +1,151 @@
-import { apiFetch, setToken } from './api.js';
-
 document.addEventListener('DOMContentLoaded', () => {
+    // -------------------------------------------------------------------------
+    // 1. Login Form Handling
+    // -------------------------------------------------------------------------
     const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const skillInput = document.getElementById('skill-autocomplete');
-    const selectedSkillsContainer = document.getElementById('selected-skills-list');
+    const loginError = document.getElementById('login-error');
 
-    let selectedSkills = [];
-
-    // --- Dynamic Skill Selection with Autocomplete ---
-    if (skillInput) {
-        skillInput.addEventListener('input', async (e) => {
-            const query = e.target.value.trim();
-            if (query.length < 2) return;
-
-            try {
-                // Fetch skill suggestions from backend
-                const response = await apiFetch(`/skills?q=${encodeURIComponent(query)}`);
-                renderSkillSuggestions(response.skills || []);
-            } catch (err) {
-                console.error('Skill lookup error:', err);
-            }
-        });
-    }
-
-    function renderSkillSuggestions(skills) {
-        let suggestionBox = document.getElementById('skill-suggestions');
-        if (!suggestionBox) {
-            suggestionBox = document.createElement('div');
-            suggestionBox.id = 'skill-suggestions';
-            suggestionBox.className = 'list-group position-absolute w-100 z-3 shadow-sm';
-            skillInput.parentNode.appendChild(suggestionBox);
-        }
-
-        suggestionBox.innerHTML = skills.map(skill => `
-            <button type="button" class="list-group-item list-group-item-action skill-item" data-id="${skill.id}" data-name="${skill.name}">
-                ${skill.name}
-            </button>
-        `).join('');
-
-        suggestionBox.querySelectorAll('.skill-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                addSkillBadge(btn.dataset.id, btn.dataset.name);
-                suggestionBox.innerHTML = '';
-                skillInput.value = '';
-            });
-        });
-    }
-
-    function addSkillBadge(id, name) {
-        if (selectedSkills.some(s => s.skill_id === parseInt(id))) return;
-
-        const skillObj = { skill_id: parseInt(id), name, proficiency_level: 'beginner' };
-        selectedSkills.push(skillObj);
-
-        const badge = document.createElement('div');
-        badge.className = 'badge bg-primary me-2 mb-2 p-2 d-inline-flex align-items-center gap-2';
-        badge.dataset.id = id;
-        badge.innerHTML = `
-            <span>${name}</span>
-            <select class="form-select form-select-sm border-0 py-0 text-dark" style="font-size:0.75rem;">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-            </select>
-            <button type="button" class="btn-close btn-close-white ms-1" aria-label="Remove"></button>
-        `;
-
-        badge.querySelector('select').addEventListener('change', (e) => {
-            skillObj.proficiency_level = e.target.value;
-        });
-
-        badge.querySelector('.btn-close').addEventListener('click', () => {
-            selectedSkills = selectedSkills.filter(s => s.skill_id !== parseInt(id));
-            badge.remove();
-        });
-
-        selectedSkillsContainer.appendChild(badge);
-    }
-
-    // --- Form Handlers ---
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorAlert = document.getElementById('login-error');
+            if (loginError) loginError.classList.add('d-none');
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
             try {
-                const res = await apiFetch('/auth/login', {
+                const response = await fetch('/api/auth/login', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
 
-                setToken(res.token);
-                window.location.href = '/courses';
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/courses';
+                } else {
+                    if (loginError) {
+                        loginError.textContent = data.error || 'Login failed. Please try again.';
+                        loginError.classList.remove('d-none');
+                    }
+                }
             } catch (err) {
-                if (errorAlert) {
-                    errorAlert.textContent = err.message;
-                    errorAlert.classList.remove('d-none');
+                console.error('Login Error:', err);
+                if (loginError) {
+                    loginError.textContent = 'Network error. Please try again.';
+                    loginError.classList.remove('d-none');
                 }
             }
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Registration Form & Skill Selection Handling
+    // -------------------------------------------------------------------------
+    const registerForm = document.getElementById('register-form');
+    const registerError = document.getElementById('register-error');
+    const skillInput = document.getElementById('skill-autocomplete');
+    const skillsListContainer = document.getElementById('selected-skills-list');
+    
+    let selectedSkills = [];
+
+    // Skill Autocomplete Handler
+    if (skillInput) {
+        skillInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const skillName = skillInput.value.trim();
+                if (!skillName) return;
+
+                // Check if already added
+                if (selectedSkills.some(s => s.name.toLowerCase() === skillName.toLowerCase())) {
+                    skillInput.value = '';
+                    return;
+                }
+
+                try {
+                    // Search DB for skill ID or fallback to dynamic creation
+                    const res = await fetch(`/api/skills?q=${encodeURIComponent(skillName)}`);
+                    const skillsData = await res.json();
+                    
+                    let skillId = null;
+                    if (skillsData.length > 0) {
+                        skillId = skillsData[0].id;
+                    }
+
+                    const newSkill = { skill_id: skillId, name: skillName, proficiency_level: 'intermediate' };
+                    selectedSkills.push(newSkill);
+                    renderSkillBadges();
+                    skillInput.value = '';
+                } catch (err) {
+                    console.error('Skill lookup error:', err);
+                }
+            }
+        });
+    }
+
+    function renderSkillBadges() {
+        if (!skillsListContainer) return;
+        skillsListContainer.innerHTML = '';
+        selectedSkills.forEach((skill, index) => {
+            const badge = document.createElement('span');
+            badge.className = 'tag';
+            badge.style.marginRight = '5px';
+            badge.style.cursor = 'pointer';
+            badge.innerHTML = `${skill.name} &times;`;
+            badge.onclick = () => {
+                selectedSkills.splice(index, 1);
+                renderSkillBadges();
+            };
+            skillsListContainer.appendChild(badge);
         });
     }
 
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorAlert = document.getElementById('register-error');
+            if (registerError) registerError.classList.add('d-none');
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const major = document.getElementById('major')?.value.trim() || '';
+
+            const payload = {
+                username,
+                email,
+                password,
+                major,
+                skills: selectedSkills
+            };
 
             try {
-                const res = await apiFetch('/auth/register', {
+                const response = await fetch('/api/auth/register', {
                     method: 'POST',
-                    body: JSON.stringify({
-                        username,
-                        email,
-                        password,
-                        skills: selectedSkills
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
 
-                setToken(res.token);
-                window.location.href = '/courses';
+                const data = await response.json();
+
+                if (response.status === 201 && data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/courses';
+                } else {
+                    if (registerError) {
+                        registerError.textContent = data.error || 'Registration failed.';
+                        registerError.classList.remove('d-none');
+                    }
+                }
             } catch (err) {
-                if (errorAlert) {
-                    errorAlert.textContent = err.message;
-                    errorAlert.classList.remove('d-none');
+                console.error('Register Error:', err);
+                if (registerError) {
+                    registerError.textContent = 'Server connection error.';
+                    registerError.classList.remove('d-none');
                 }
             }
         });

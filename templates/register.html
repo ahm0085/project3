@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Sentiment Analysis Platform</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+  <title>Register - SkillSync AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 <body>
   <main class="auth-container">
     <section class="auth-card">
       <header class="auth-header">
         <h1>Create Account</h1>
-        <p>Start running text & sentiment analysis</p>
+        <p>Start discovering personalized courses and skills</p>
       </header>
+
+      <!-- Error Alert Container -->
+      <div id="register-error" class="alert alert-danger d-none" role="alert" style="color: red; margin-bottom: 1rem;"></div>
 
       <form id="register-form">
         <div class="form-group">
@@ -31,6 +33,20 @@
           <input type="password" id="password" name="password" required placeholder="••••••••">
         </div>
 
+        <div class="form-group">
+          <label for="major">Major / Field of Study</label>
+          <input type="text" id="major" name="major" placeholder="Computer Science">
+        </div>
+
+        <!-- Dynamic Skill Autocomplete Section -->
+        <div class="form-group position-relative" style="position: relative;">
+          <label for="skill-autocomplete">Add Your Skills</label>
+          <input type="text" id="skill-autocomplete" placeholder="Type a skill (e.g. Python, SQL)..." autocomplete="off">
+        </div>
+
+        <!-- Selected Skills Badges Container -->
+        <div id="selected-skills-list" class="selected-skills-container" style="margin: 10px 0;"></div>
+
         <button type="submit" class="btn-primary">Create Account</button>
       </form>
 
@@ -39,5 +55,8 @@
       </footer>
     </section>
   </main>
+
+  <!-- Load Auth JavaScript Module -->
+  <script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
 </body>
 </html>

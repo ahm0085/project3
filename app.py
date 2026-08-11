@@ -1,30 +1,31 @@
 import os
 import numpy as np
 from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
-    JWTManager, create_access_token, jwt_required, get_jwt_identity,
-    decode_token
+    create_access_token, jwt_required, get_jwt_identity, decode_token
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import Config
 
-# Initialize extensions
-db = SQLAlchemy()
-jwt = JWTManager()
+from config import Config
+from extensions import db, jwt
+import models
 
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    # Determine the absolute path to project directory to prevent static resolution issues
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    
+    app = Flask(
+        __name__,
+        static_folder=os.path.join(base_dir, 'static'),
+        static_url_path='/static'
+    )
     app.config.from_object(config_class)
 
     os.makedirs(app.instance_path, exist_ok=True)
 
     db.init_app(app)
     jwt.init_app(app)
-
-    with app.app_context():
-        import models
 
     # =========================================================================
     # Helper Utilities
@@ -37,7 +38,7 @@ def create_app(config_class=Config):
         auth_header = request.headers.get("Authorization", None)
         if not auth_header or not auth_header.startswith("Bearer "):
             return None
-        
+
         token = auth_header.split(" ")[1]
         try:
             decoded = decode_token(token)
@@ -70,7 +71,7 @@ def create_app(config_class=Config):
         course_skill_names = [
             cs.skill.name for cs in getattr(course, 'course_skills', []) if cs.skill
         ]
-        
+
         matched_skills = list(set(user_skill_names).intersection(set(course_skill_names)))
         missing_skills = list(set(course_skill_names) - set(user_skill_names))
 
@@ -149,6 +150,27 @@ def create_app(config_class=Config):
     @app.route('/profile')
     def profile_page():
         return render_template('profile.html')
+
+    # =========================================================================
+    # API Routes: Skills Autocomplete
+    # =========================================================================
+    @app.route('/api/skills', methods=['GET'])
+    def get_skills():
+        search_q = request.args.get('q', '', type=str).strip()
+        query = models.Skill.query
+
+        if search_q:
+            query = query.filter(models.Skill.name.ilike(f"%{search_q}%"))
+
+        skills = query.limit(20).all()
+        return jsonify([
+            {
+                "id": skill.id,
+                "name": skill.name,
+                "description": skill.description
+            }
+            for skill in skills
+        ]), 200
 
     # =========================================================================
     # API Routes: Course Discovery & Search
@@ -241,7 +263,7 @@ def create_app(config_class=Config):
                 if hasattr(other, 'embedding') and other.embedding is not None:
                     sim = cosine_similarity(target_vector, other.embedding)
                     scored_related.append((sim, other))
-            
+
             scored_related.sort(key=lambda x: x[0], reverse=True)
             top_related = [item[1] for item in scored_related[:5]]
         else:
@@ -264,7 +286,7 @@ def create_app(config_class=Config):
         }), 200
 
     # =========================================================================
-    # API Routes: Personalized Recommendations (Step 10)
+    # API Routes: Personalized Recommendations
     # =========================================================================
 
     # -------------------------------------------------------------------------
@@ -288,12 +310,10 @@ def create_app(config_class=Config):
 
         # Retrieve user skill profile (supporting optional request overrides)
         override_skills = data.get('skills', None)
-        
+
         if override_skills is not None and isinstance(override_skills, list):
-            # Formatted list of skill names passed from body
             user_skill_names = [s.get('name') for s in override_skills if isinstance(s, dict) and 'name' in s]
         else:
-            # Saved database profile skills
             user_skill_names = [us.skill.name for us in user.user_skills if us.skill]
 
         all_courses = models.Course.query.all()
@@ -302,7 +322,7 @@ def create_app(config_class=Config):
         # Calculate vector similarity or skill match score for all courses
         for course in all_courses:
             match_score = calculate_match_score(user.user_skills, course.course_skills)
-            
+
             # Check for embedding similarity if available
             if hasattr(user, 'embedding') and hasattr(course, 'embedding'):
                 if user.embedding and course.embedding:
@@ -471,4 +491,4 @@ def create_app(config_class=Config):
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

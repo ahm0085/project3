@@ -3,39 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Courses</title>
-    <!-- Link both main style.css and courses.css for layout & grid controls -->
+    <title>Browse Courses - SkillSync AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/courses.css') }}">
     <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navMenu = document.getElementById('nav-menu');
+      document.addEventListener('DOMContentLoaded', function () {
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const navMenu = document.getElementById('nav-menu');
 
-    if (hamburgerBtn && navMenu) {
-      hamburgerBtn.addEventListener('click', function () {
-        navMenu.classList.toggle('active');
+        if (hamburgerBtn && navMenu) {
+          hamburgerBtn.addEventListener('click', function () {
+            navMenu.classList.toggle('active');
+          });
+        }
       });
-    }
-  });
-</script>
+    </script>
 </head>
 <body>
 
     <!-- Header & Navigation -->
     <header>
         <nav class="navbar">
-            <a href="/" class="nav-brand">SkillSync AI</a>
+            <a href="{{ url_for('courses_page') }}" class="nav-brand">SkillSync AI</a>
             <button class="hamburger" id="hamburger-btn">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
             <ul class="nav-links" id="nav-menu">
-                <li><a href="/courses" class="active">Courses</a></li>
-                <li><a href="/analyze">Analyze</a></li>
-                <li><a href="/history">History</a></li>
-                <li><a href="/profile">Profile</a></li>
+                <li><a href="{{ url_for('courses_page') }}" class="active">Courses</a></li>
+                <li><a href="{{ url_for('analyze_page') }}">Analyze</a></li>
+                <li><a href="{{ url_for('history_page') }}">History</a></li>
+                <li><a href="{{ url_for('profile_page') }}">Profile</a></li>
+                <li><button id="logout-btn" class="btn-logout">Logout</button></li>
             </ul>
         </nav>
     </header>
@@ -135,10 +135,11 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2026 SkillSync AI. All rights reserved.</p>
     </footer>
 
+    <!-- Load API and General JavaScript -->
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
 </body>
 </html>
